@@ -24,6 +24,9 @@ inputs:
   repo_sha:
     description: 'Repo SHA, Branch, or Tag'
     required: true
+  sstate_cache:
+    description: 'Directory to sstate_cache'
+    required: false
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 runs:
@@ -52,6 +55,7 @@ runs:
         cd ${{ inputs.machine }}-${{ inputs.repo_sha }}-${GITHUB_RUN_ID}
         EULA=1 MACHINE=${{ inputs.machine }} DISTRO=${{ inputs.distro }} source ./${{ inputs.setup_script }} ${{ inputs.build_dir }}
         if [ -e /opt/yocto_downloads/ ]; then sed -i 's/DL_DIR ?= "${BSPDIR}\/downloads/DL_DIR = "\/opt\/yocto_downloads/g' conf/local.conf; fi
+        if [ -n "${{ inputs.sstate_cache }}" ]; then mkdir -p ${{ inputs.sstate_cache }} && echo "SSTATE_DIR = \"${{ inputs.sstate_cache }}\"" >> conf/local.conf; fi
       shell: bash
 
     - name: build ${{ inputs.image }}
